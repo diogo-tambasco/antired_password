@@ -6,21 +6,54 @@ CLAUDE.md
 .env.*
 config/master.key
 config/credentials/*.key
-config/deploy.yml      # pode conter host/registry; mantenha fora do git
+# config/deploy.yml pode conter host/registry; mantenha fora do git
+config/deploy.yml
+# segredos de deploy do Kamal — NUNCA versionar
+.kamal/secrets
 *.pem
 *.key
 
 # Cofre / dados sensíveis (SQLite cifrado, mas fora do git por garantia)
 /storage/
+/storage/*
 *.sqlite3
 *.sqlite3-*
 
-# Rails padrão
+# ───────────────────────────────────────────────────────────────────────
+# Rails padrão (gerado pelo `rails new`)
+# See https://help.github.com/articles/ignoring-files for more about ignoring files.
+
+# Ignore bundler config.
+/.bundle
+
+# Ignore all environment files.
+/.env*
+
+# Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# Ignore pidfiles, but keep the directory.
+/tmp/pids/*
+!/tmp/pids/
+!/tmp/pids/.keep
+
+# Ignore storage (uploaded files in development and any SQLite databases).
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/
+!/tmp/storage/.keep
+
 /public/assets
-.bundle
 /vendor/bundle
+
+# Ignore key files for decrypting credentials and more.
+/config/*.key
+
+# Claude Code — settings locais por máquina (o settings.json compartilhado é versionado)
+.claude/settings.local.json
 
 # OS
 .DS_Store

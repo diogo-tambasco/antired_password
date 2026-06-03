@@ -1,0 +1,33 @@
+<%= form_with model: @entry, url: url, method: method do |f| %>
+  <% if @entry.errors.any? %>
+    <div role="alert">
+      <ul>
+        <% @entry.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "Nome" %>
+    <%= f.text_field :name %>
+  </div>
+
+  <div>
+    <%= f.label :kind, "Tipo" %>
+    <%= f.select :kind, VaultEntry.kinds.keys.map { |k| [k, k] }, selected: @entry.kind %>
+  </div>
+
+  <div>
+    <%= label_tag "vault_entry[value]", "Valor (segredo)" %>
+    <%= text_area_tag "vault_entry[value]", nil %>
+    <% if @entry.persisted? %>
+      <small>Deixe em branco pra manter o valor atual.</small>
+    <% end %>
+  </div>
+
+  <div>
+    <%= f.submit %>
+  </div>
+<% end %>

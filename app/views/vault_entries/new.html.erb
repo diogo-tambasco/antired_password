@@ -1,0 +1,7 @@
+<% content_for :title, "Novo segredo" %>
+
+<h1>Novo segredo</h1>
+
+<%= render "form", url: vault_entries_path, method: :post %>
+
+<p><%= link_to "Voltar", vault_entries_path %></p>

@@ -1,0 +1,25 @@
+<% content_for :title, "Criar conta" %>
+
+<% if flash[:alert] %>
+  <p role="alert"><%= flash[:alert] %></p>
+<% end %>
+
+<h1>Criar conta</h1>
+
+<%= form_with url: signup_path, method: :post do %>
+  <div>
+    <%= label_tag :email_address, "E-mail" %>
+    <%= email_field_tag :email_address, params[:email_address], required: true, autofocus: true, autocomplete: "username" %>
+  </div>
+
+  <div>
+    <%= label_tag :master_password, "Master password" %>
+    <%= password_field_tag :master_password, nil, required: true, autocomplete: "new-password" %>
+  </div>
+
+  <div>
+    <%= submit_tag "Criar conta" %>
+  </div>
+<% end %>
+
+<p><%= link_to "Já tenho conta", login_path %></p>

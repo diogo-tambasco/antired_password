@@ -1,0 +1,7 @@
+<% content_for :title, "Editar segredo" %>
+
+<h1>Editar segredo</h1>
+
+<%= render "form", url: vault_entry_path(@entry), method: :patch %>
+
+<p><%= link_to "Voltar", vault_entry_path(@entry) %></p>
