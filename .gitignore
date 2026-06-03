@@ -60,3 +60,6 @@ config/deploy.yml
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+# deploy real (master key) fica só na VPS
+/deploy/.env

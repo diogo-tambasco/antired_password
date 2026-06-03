@@ -1,0 +1,6 @@
+# Caddy emite e renova o certificado TLS (Let's Encrypt) automaticamente para o
+# domínio em ANTIRED_DOMAIN, e faz proxy reverso pro container do app.
+{$ANTIRED_DOMAIN} {
+	reverse_proxy app:80
+	encode zstd gzip
+}
