@@ -1,0 +1,49 @@
+# antired_password — deploy direto na VPS (Docker + Caddy com TLS automático).
+#
+# Caddy termina o TLS (Let's Encrypt) e faz proxy reverso pro app; o SQLite do
+# cofre vive num volume Docker que persiste entre deploys. Single-process (a DEK
+# fica em RAM na sessão; múltiplos workers quebrariam isso).
+#
+# Uso:
+#   1) .env com RAILS_MASTER_KEY e ANTIRED_DOMAIN (ver .env.example)
+#   2) docker build -t antired_password:latest .   (na raiz do repo)
+#   3) docker compose up -d
+
+services:
+  app:
+    image: antired_password:latest
+    restart: unless-stopped
+    env_file: .env                  # RAILS_MASTER_KEY
+    environment:
+      RAILS_ENV: production
+      WEB_CONCURRENCY: "0"          # processo único: a DEK vive em RAM (1 processo)
+      # Sem Solid-Queue-no-Puma: cofre de instância única não precisa de worker no
+      # boot, e o supervisor forkado derrubava o Puma ("Solid Queue has gone away").
+      # (ENV["SOLID_QUEUE_IN_PUMA"]="false" ainda é truthy no Ruby → tem que OMITIR.)
+    volumes:
+      - antired_storage:/rails/storage   # PERSISTE o SQLite entre deploys
+    expose:
+      - "80"                        # só na rede interna; o público entra pelo Caddy
+    networks: [antired]
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    env_file: .env                  # ANTIRED_DOMAIN (Caddy resolve {$ANTIRED_DOMAIN})
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data            # certs Let's Encrypt persistidos
+      - caddy_config:/config
+    networks: [antired]
+    depends_on: [app]
+
+networks:
+  antired:
+
+volumes:
+  antired_storage:
+  caddy_data:
+  caddy_config:
