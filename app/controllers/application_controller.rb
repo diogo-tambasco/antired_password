@@ -32,4 +32,10 @@ class ApplicationController < ActionController::Base
     session[:user_id] = user.id
     session[:dek] = Base64.strict_encode64(dek)
   end
+
+  # Bloqueio compartilhado (vault_entries, projects, access_tokens): precisa estar
+  # logado E com a DEK em sessão (RAM). Sem DEK não há como cifrar/decifrar nada.
+  def require_unlock
+    redirect_to login_path unless logged_in? && current_dek
+  end
 end

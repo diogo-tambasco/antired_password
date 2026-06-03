@@ -10,6 +10,7 @@ require "envelope_encryption"
 # ciphertext/nonce: a entry é criada antes de cifrar e cifrada em seguida.
 class VaultEntry < ApplicationRecord
   belongs_to :user
+  belongs_to :project, optional: true
 
   enum :kind, { login: 0, env: 1, secure_note: 2 }
 

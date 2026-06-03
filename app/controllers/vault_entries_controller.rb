@@ -57,13 +57,8 @@ class VaultEntriesController < ApplicationController
 
   private
 
-  # Bloqueio: precisa estar logado E ter a DEK em sessão (senão não decifra nada).
-  def require_unlock
-    redirect_to login_path unless logged_in? && current_dek
-  end
-
   # `value` NUNCA entra aqui — é o segredo, lido à parte e cifrado com a DEK.
   def entry_params
-    params.require(:vault_entry).permit(:name, :kind, metadata: {})
+    params.require(:vault_entry).permit(:name, :kind, :project_id, metadata: {})
   end
 end

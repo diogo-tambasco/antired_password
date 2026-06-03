@@ -1,0 +1,44 @@
+<% content_for :title, "Projetos" %>
+
+<div class="min-h-screen">
+  <%= render "shared/appnav" %>
+
+  <main class="mx-auto max-w-3xl px-4 py-8">
+    <%= render "shared/flash" %>
+
+    <div class="mb-6 flex items-center justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-semibold tracking-tight text-white">Projetos</h1>
+        <p class="text-sm text-zinc-500">Agrupe segredos e puxe o <span class="font-mono text-zinc-400">.env</span> com <span class="font-mono text-emerald-400">/antired</span></p>
+      </div>
+      <%= link_to new_project_path, class: "inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400" do %>
+        <span class="text-base leading-none">+</span> Novo projeto
+      <% end %>
+    </div>
+
+    <% if @projects.empty? %>
+      <div class="rounded-2xl border border-dashed border-zinc-800 bg-zinc-900/40 px-6 py-16 text-center">
+        <div class="mb-3 text-3xl">📦</div>
+        <p class="text-zinc-400">Nenhum projeto ainda.</p>
+        <p class="mt-1 text-sm text-zinc-600">Crie um projeto, importe um <span class="font-mono">.env</span>, e puxe ele de volta com <span class="font-mono text-emerald-400">/antired</span>.</p>
+      </div>
+    <% else %>
+      <ul class="space-y-2">
+        <% @projects.each do |project| %>
+          <li>
+            <%= link_to project_path(project), class: "group flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3.5 transition hover:border-zinc-700 hover:bg-zinc-900" do %>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-zinc-500">📦</span>
+                  <span class="truncate font-medium text-zinc-100"><%= project.name %></span>
+                </div>
+                <p class="mt-0.5 text-xs text-zinc-500"><%= pluralize(project.vault_entries.env.count, "variável", "variáveis") %> de ambiente</p>
+              </div>
+              <span class="ml-3 hidden shrink-0 font-mono text-xs text-zinc-600 transition group-hover:text-emerald-400 sm:inline">/antired <%= project.name.downcase %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </main>
+</div>
