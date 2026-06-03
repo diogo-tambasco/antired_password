@@ -1,0 +1,26 @@
+# ⚠️ CLAUDE.md contém a senha root da VPS em texto puro — NUNCA versionar
+CLAUDE.md
+
+# Secrets / credenciais
+.env
+.env.*
+config/master.key
+config/credentials/*.key
+config/deploy.yml      # pode conter host/registry; mantenha fora do git
+*.pem
+*.key
+
+# Cofre / dados sensíveis (SQLite cifrado, mas fora do git por garantia)
+/storage/
+*.sqlite3
+*.sqlite3-*
+
+# Rails padrão
+/log/*
+/tmp/*
+/public/assets
+.bundle
+/vendor/bundle
+
+# OS
+.DS_Store
