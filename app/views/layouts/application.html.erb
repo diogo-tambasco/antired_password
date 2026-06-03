@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR" class="h-full">
   <head>
-    <title><%= content_for(:title) || "Antired Password" %></title>
+    <title><%= content_for(:title) ? "#{content_for(:title)} · antired_password" : "antired_password" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Antired Password">
@@ -11,18 +11,15 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%# CSS do Tailwind (build em app/assets/builds/tailwind.css) %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
   </head>
 
-  <body>
+  <body class="h-full bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-500/30">
     <%= yield %>
   </body>
 </html>

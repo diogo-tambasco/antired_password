@@ -1,7 +1,14 @@
 <% content_for :title, "Novo segredo" %>
 
-<h1>Novo segredo</h1>
+<div class="mx-auto min-h-screen max-w-xl px-4 py-8">
+  <%= link_to vault_entries_path, class: "inline-flex items-center gap-1.5 text-sm text-zinc-400 transition hover:text-white" do %>
+    <span aria-hidden="true">←</span> Voltar ao cofre
+  <% end %>
 
-<%= render "form", url: vault_entries_path, method: :post %>
+  <h1 class="mt-6 text-2xl font-semibold tracking-tight text-white">Novo segredo</h1>
+  <p class="mt-1 text-sm text-zinc-500">O valor é cifrado com a sua DEK antes de tocar o banco.</p>
 
-<p><%= link_to "Voltar", vault_entries_path %></p>
+  <div class="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 shadow-xl">
+    <%= render "form", url: vault_entries_path, method: :post %>
+  </div>
+</div>
