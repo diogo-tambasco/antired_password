@@ -1,23 +1,38 @@
 <% content_for :title, @entry.name %>
 
-<h1><%= @entry.name %></h1>
+<div class="mx-auto min-h-screen max-w-2xl px-4 py-8">
+  <%= link_to vault_entries_path, class: "inline-flex items-center gap-1.5 text-sm text-zinc-400 transition hover:text-white" do %>
+    <span aria-hidden="true">←</span> Voltar ao cofre
+  <% end %>
 
-<p>Tipo: <%= @entry.kind %></p>
+  <div class="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 shadow-xl">
+    <h1 class="text-2xl font-semibold tracking-tight text-white"><%= @entry.name %></h1>
+    <span class="mt-2 inline-flex items-center rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs font-medium text-zinc-400"><%= @entry.kind %></span>
 
-<% if @entry.metadata.present? %>
-  <dl>
-    <% @entry.metadata.each do |key, val| %>
-      <dt><%= key %></dt>
-      <dd><%= val %></dd>
+    <% if @entry.metadata.present? %>
+      <dl class="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-zinc-800 bg-zinc-800 sm:grid-cols-2">
+        <% @entry.metadata.each do |key, val| %>
+          <div class="bg-zinc-900 px-4 py-3">
+            <dt class="text-xs uppercase tracking-wide text-zinc-500"><%= key %></dt>
+            <dd class="mt-0.5 break-words text-sm text-zinc-200"><%= val %></dd>
+          </div>
+        <% end %>
+      </dl>
     <% end %>
-  </dl>
-<% end %>
 
-<h2>Valor</h2>
-<pre><%= @value %></pre>
+    <div class="mt-6">
+      <%# Reveal CSS-only: o checkbox (peer) destranca o blur do <pre> irmão. Sem JS. %>
+      <input id="reveal_secret" type="checkbox" class="peer sr-only">
+      <div class="mb-2 flex items-center justify-between">
+        <h2 class="text-xs font-medium uppercase tracking-wide text-zinc-500">Valor</h2>
+        <label for="reveal_secret" class="cursor-pointer select-none text-xs font-medium text-emerald-400 transition hover:text-emerald-300">👁 Revelar / ocultar</label>
+      </div>
+      <pre class="overflow-x-auto whitespace-pre-wrap break-all rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3.5 font-mono text-sm text-emerald-300 blur-sm transition select-all peer-checked:blur-none"><%= @value %></pre>
+    </div>
+  </div>
 
-<p>
-  <%= link_to "Editar", edit_vault_entry_path(@entry) %>
-  <%= button_to "Apagar", vault_entry_path(@entry), method: :delete %>
-  <%= link_to "Voltar", vault_entries_path %>
-</p>
+  <div class="mt-4 flex items-center gap-2">
+    <%= link_to "Editar", edit_vault_entry_path(@entry), class: "inline-flex items-center gap-1.5 rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:bg-zinc-700" %>
+    <%= button_to "Apagar", vault_entry_path(@entry), method: :delete, form: { data: { turbo_confirm: "Apagar este segredo? Não dá pra desfazer." } }, class: "inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/10" %>
+  </div>
+</div>
