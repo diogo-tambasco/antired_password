@@ -1,0 +1,23 @@
+<% content_for :title, @entry.name %>
+
+<h1><%= @entry.name %></h1>
+
+<p>Tipo: <%= @entry.kind %></p>
+
+<% if @entry.metadata.present? %>
+  <dl>
+    <% @entry.metadata.each do |key, val| %>
+      <dt><%= key %></dt>
+      <dd><%= val %></dd>
+    <% end %>
+  </dl>
+<% end %>
+
+<h2>Valor</h2>
+<pre><%= @value %></pre>
+
+<p>
+  <%= link_to "Editar", edit_vault_entry_path(@entry) %>
+  <%= button_to "Apagar", vault_entry_path(@entry), method: :delete %>
+  <%= link_to "Voltar", vault_entries_path %>
+</p>

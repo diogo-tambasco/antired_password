@@ -16,11 +16,26 @@ begin
 
   module ActiveSupport
     class TestCase
-      # Roda os testes em paralelo (default Rails 8).
-      parallelize(workers: :number_of_processors)
+      # SQLite single-file + múltiplos workers em paralelo causam
+      # SQLite3::BusyException ("database is locked") intermitente no setup
+      # (User.register grava no banco). Serializar elimina a flakiness de I/O
+      # sem afetar o comportamento testado. (Exceção documentada de edição em test/.)
+      parallelize(workers: 1)
 
       # Carrega todos os fixtures de test/fixtures/*.yml.
       fixtures :all
+
+      # Isolamento de estado do rack-attack entre testes (infra, não contrato).
+      # Os contadores de throttle do rack-attack vivem no Rails.cache (memory_store
+      # em test). Sem zerar entre testes, os múltiplos POST /session que vários
+      # testes de integração disparam (mesmo IP 127.0.0.1, janela de 20s) somam e
+      # estouram o limite de 5/20s — fazendo logins legítimos de setup virarem 429
+      # e quebrarem testes não-relacionados de forma dependente da ordem. Limpar o
+      # cache antes de cada teste dá a cada um uma janela limpa (o RateLimitingTest
+      # já faz isso no próprio setup, então continua válido).
+      setup do
+        Rails.cache.clear if defined?(Rails) && Rails.respond_to?(:cache)
+      end
     end
   end
 rescue LoadError => e

@@ -1,0 +1,29 @@
+<% content_for :title, "Cofre" %>
+
+<% if flash[:notice] %>
+  <p role="status"><%= flash[:notice] %></p>
+<% end %>
+
+<h1>Cofre</h1>
+
+<p>Logado como <%= current_user.email_address %>.
+  <%= button_to "Sair", session_path, method: :delete %>
+</p>
+
+<p><%= link_to "Novo segredo", new_vault_entry_path %></p>
+
+<% if @entries.empty? %>
+  <p>Nenhum segredo guardado ainda.</p>
+<% else %>
+  <ul>
+    <% @entries.each do |entry| %>
+      <li>
+        <%= link_to entry.name, vault_entry_path(entry) %>
+        <span><%= entry.kind %></span>
+        <% if entry.metadata.present? %>
+          <small><%= entry.metadata.to_json %></small>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
