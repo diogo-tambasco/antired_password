@@ -1,0 +1,12 @@
+<% content_for :title, "Novo projeto" %>
+
+<div class="mx-auto min-h-screen max-w-2xl px-4 py-8">
+  <%= link_to projects_path, class: "inline-flex items-center gap-1.5 text-sm text-zinc-400 transition hover:text-white" do %>
+    <span aria-hidden="true">←</span> Voltar aos projetos
+  <% end %>
+
+  <div class="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 shadow-xl">
+    <h1 class="mb-5 text-xl font-semibold tracking-tight text-white">Novo projeto</h1>
+    <%= render "form", project: @project %>
+  </div>
+</div>

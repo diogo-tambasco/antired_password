@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# antired — cliente do cofre antired_password. Puxa segredos pro .env via API.
+# Sem dependências além de curl. Config em ~/.config/antired/config
+# (ANTIRED_URL / ANTIRED_TOKEN) ou nas variáveis de ambiente de mesmo nome.
+set -euo pipefail
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/antired"
+CONFIG_FILE="$CONFIG_DIR/config"
+
+if [ -f "$CONFIG_FILE" ]; then
+  # shellcheck disable=SC1090
+  . "$CONFIG_FILE"
+fi
+ANTIRED_URL="${ANTIRED_URL:-}"
+ANTIRED_TOKEN="${ANTIRED_TOKEN:-}"
+
+die() { printf 'antired: %s\n' "$1" >&2; exit 1; }
+
+require_config() {
+  [ -n "$ANTIRED_URL" ]   || die "ANTIRED_URL não configurada. Rode: antired login <url> <token>"
+  [ -n "$ANTIRED_TOKEN" ] || die "ANTIRED_TOKEN não configurado. Rode: antired login <url> <token>"
+  case "$ANTIRED_URL" in
+    https://*) : ;;
+    http://localhost*|http://127.0.0.1*) : ;;
+    http://*) die "recusando URL http:// não-local ('$ANTIRED_URL'). Use https:// — é um cofre." ;;
+    *) die "ANTIRED_URL inválida: '$ANTIRED_URL'" ;;
+  esac
+}
+
+urlencode() {
+  local s="$1" out="" c i
+  for (( i=0; i<${#s}; i++ )); do
+    c="${s:i:1}"
+    case "$c" in
+      [a-zA-Z0-9._~-]) out+="$c" ;;
+      *) out+=$(printf '%%%02X' "'$c") ;;
+    esac
+  done
+  printf '%s' "$out"
+}
+
+api() {
+  local path="$1" out status body
+  out="$(curl -sS -H "Authorization: Bearer $ANTIRED_TOKEN" -H "Accept: text/plain" \
+        "$ANTIRED_URL$path" -w $'\n%{http_code}' 2>/dev/null)" \
+    || die "não consegui falar com $ANTIRED_URL (servidor fora do ar?)"
+  status="${out##*$'\n'}"
+  body="${out%$'\n'*}"
+  case "$status" in
+    2*) printf '%s' "$body" ;;
+    401) die "token inválido ou revogado (401). Gere outro em $ANTIRED_URL/access_tokens" ;;
+    404) die "projeto não encontrado (404)" ;;
+    *)   die "erro HTTP $status" ;;
+  esac
+}
+
+cmd_login() {
+  [ $# -ge 2 ] || die "uso: antired login <url> <token>"
+  mkdir -p "$CONFIG_DIR"; chmod 700 "$CONFIG_DIR"
+  ( umask 177; printf 'ANTIRED_URL=%s\nANTIRED_TOKEN=%s\n' "$1" "$2" > "$CONFIG_FILE" )
+  chmod 600 "$CONFIG_FILE"
+  printf 'antired: configurado (%s) em %s\n' "$1" "$CONFIG_FILE"
+}
+
+cmd_ls() {
+  require_config
+  api "/api/v1/projects"
+}
+
+cmd_env() {
+  [ $# -ge 1 ] || die "uso: antired env <projeto> [arquivo-destino]"
+  require_config
+  local project="$1" dest="${2:-.env}" body
+  body="$(api "/api/v1/projects/$(urlencode "$project")/env")"
+  if [ "$dest" = "-" ]; then
+    printf '%s' "$body"
+    return
+  fi
+  if [ -f "$dest" ]; then
+    cp "$dest" "$dest.bak"
+    printf 'antired: backup do %s anterior salvo em %s.bak\n' "$dest" "$dest" >&2
+  fi
+  ( umask 177; printf '%s' "$body" > "$dest" )
+  chmod 600 "$dest"
+  local n; n="$(printf '%s\n' "$body" | grep -c '=' || true)"
+  printf 'antired: %s variáveis escritas em %s (0600)\n' "$n" "$dest"
+}
+
+cmd_open() {
+  require_config
+  local url="$ANTIRED_URL"; [ $# -ge 1 ] && url="$ANTIRED_URL/projects"
+  if   command -v open     >/dev/null 2>&1; then open "$url"
+  elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$url"
+  else printf '%s\n' "$url"; fi
+}
+
+usage() {
+  cat <<'EOF'
+antired — cofre de segredos no seu .env
+
+  antired login <url> <token>      configura url + token (uma vez)
+  antired ls                       lista projetos acessíveis
+  antired env <projeto> [destino]  escreve o .env do projeto (default ./.env, 0600)
+  antired env <projeto> -          imprime o .env no stdout (não grava)
+  antired open [projetos]          abre o cofre no navegador
+
+Config: ${XDG_CONFIG_HOME:-~/.config}/antired/config
+EOF
+}
+
+main() {
+  local cmd="${1:-help}"; shift || true
+  case "$cmd" in
+    login)      cmd_login "$@" ;;
+    ls|list)    cmd_ls "$@" ;;
+    env|pull)   cmd_env "$@" ;;
+    open)       cmd_open "$@" ;;
+    help|-h|--help) usage ;;
+    *) die "comando desconhecido: $cmd (veja: antired help)" ;;
+  esac
+}
+
+main "$@"

@@ -13,6 +13,8 @@ class User < ApplicationRecord
   class InvalidPassword < StandardError; end
 
   has_many :vault_entries, dependent: :destroy
+  has_many :projects, dependent: :destroy
+  has_many :access_tokens, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.to_s.strip.downcase }
 

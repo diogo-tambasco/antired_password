@@ -16,6 +16,18 @@ Rails.application.routes.draw do
   resource :session, only: [:create, :destroy]
 
   resources :vault_entries
+  resources :projects, only: [:index, :show, :new, :create, :destroy] do
+    member { post :import_env }
+  end
+  resources :access_tokens, only: [:index, :create, :destroy]
+
+  # API JSON da skill /antired — autenticada por token (Bearer).
+  namespace :api do
+    namespace :v1 do
+      get "projects", to: "projects#index"
+      get "projects/:name/env", to: "projects#env", as: :project_env, constraints: { name: %r{[^/]+} }
+    end
+  end
 
   # Defines the root path route ("/")
   root "vault_entries#index"
